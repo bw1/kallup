@@ -104,33 +104,22 @@ int main(int argc, char **argv)
 			case KEY_DC:
 			case KEY_BACKSPACE:
 			{
-				if (ypos <= 1)
-				{
-					ypos = 1;
-				}
+				--xpos;
+				CHECK_XPOS
 
-				if (--xpos < 0)
+				if (xpos <= 0)
 				{
 					xpos = 0;
-					if (--ypos <= 1) ypos = 1;
+
+					if (--buffer_line < 0)
+					buffer_line = 1;
+
+					if (buffer[buffer_line].c_str()[0] == '\n')
+					--buffer_line;
 				}
-
-				if (--BUFFER_LINES < 0)
-				BUFFER_LINES = 1;
-
-				if (--buffer_line-1 < 0)
-				buffer_line = 0;
-
-				if (xpos == 1 && ypos == 1) break;
-				else	{
-					if (buffer.size() > 0)
-					buffer.erase(buffer.begin() + buffer_line);
-				}
-				
-				if (xpos == win_width-2)
+				else if (xpos == win_width-2)
 				{
 					--buffer_line;
-					--BUFFER_LINES;
 
 					if (buffer[buffer_line].size() <= xpos)
 					{
@@ -141,14 +130,24 @@ int main(int argc, char **argv)
 								xpos = i;
 								break;
 							}
-
 							--xpos;
 						}
-
-						if (xpos < 0) xpos = 0;
-						if (BUFFER_LINES > 0)
-						buffer.erase(buffer.begin()+buffer_line-1);
 					}
+					if (xpos < 0) xpos = 0;
+				}
+
+				if (ypos < 1) ypos = 1;
+				if (ypos == 1 && buffer_line == 1) --buffer_line;
+
+				if (buffer[buffer_line].size() > 0)
+					buffer[buffer_line].erase(xpos, 1);
+
+				if (xpos <= 0 && ypos <= 1)
+				{
+					buffer[buffer_line].erase(xpos, 1);
+					if (buffer[buffer_line].c_str()[0] != '\n')
+					buffer[buffer_line].append("\n");
+					break;
 				}
 			}
 			break;
