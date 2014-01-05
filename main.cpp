@@ -26,7 +26,13 @@
    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #define __MAIN_RUN__
-#include "all.h"
+// #include "all.h"
+
+// ersatz für all.h
+#include <iostream>
+#include <vector>
+#include <cursesw.h>
+
 
 #define CHECK_XPOS 			\
 	if (xpos <= 0) {		\
@@ -50,6 +56,8 @@ int main(int argc, char **argv)
 
 	WINDOW *bg_win;
 	WINDOW *my_win;
+
+	setlocale(LC_CTYPE, "");
 
 	std::vector<std::string> buffer(100);
 	std::vector<std::string>::iterator it;
@@ -328,12 +336,18 @@ int main(int argc, char **argv)
 		mvwprintw(my_win,i,0,"%s",buffer[i].c_str());
 
 
-		mvwprintw(my_win,20,20,"%d, %d, %d, :: %d",xpos, ypos, buffer_line, win_width);
+		mvwprintw(my_win,20,20,"%d, %d, %d, :: %d  =%d="
+				,xpos, ypos, buffer_line, win_width,ch);
 
 		wmove(my_win,ypos-1,xpos);
 		wrefresh(my_win);
 	}
 
 	endwin();
+
+	for (int i = 0; i < BUFFER_LINES; i++)
+		std::cout <<i << ": "<< buffer[i];
+
+
 	return 0;
 }
