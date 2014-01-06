@@ -81,12 +81,15 @@ int main(int argc, char **argv)
 	wmove (my_win, 1, 1);
 	keypad(my_win, TRUE);
 
-	BUFFER_LINES = 4;
+	BUFFER_LINES = 6;
 
 	buffer[0] = "dfjldfjklfoiucsvio lxcv lk xcvkl xjcvklxc\n";
 	buffer[1] = " ij  jklj jklckl lkjyxc\n";
 	buffer[2] = "\n";
-	buffer[3] = "kklÃ¶aksdklÃ¶aksdkadlsÃ¶klasÃ¶dasdlÃ¶kasdlkasd\n";
+	//buffer[3] = "3: kklÃ¶aksdklÃ¶aksdkadlsÃ¶klasÃ¶dasdlÃ¶kasdlkasd\n";
+	buffer[3] = "3: kklöaksdklöaksdkadlsöklasödasdlökasdlkasd\n";
+	buffer[4] = "4: kklöaksdklöaksdkadlsöklasödasdlökasdlkasd\n";
+	buffer[5] = "5: kklöaksdklöaksdkadlsöklasödasdlökasdlkasd\n";
 
 	for (int i = 0; i < BUFFER_LINES; i++)
 	mvwprintw(my_win,ypos+i-1,xpos,"%s",buffer[i].c_str());
@@ -104,50 +107,60 @@ int main(int argc, char **argv)
 			case KEY_DC:
 			case KEY_BACKSPACE:
 			{
-				--xpos;
-				CHECK_XPOS
-
-				if (xpos <= 0)
+				// kein loeschen in home position
+				if (!(xpos == 0 && ypos ==1)) 
 				{
-					xpos = 0;
-
-					if (--buffer_line < 0)
-					buffer_line = 1;
-
-					if (buffer[buffer_line].c_str()[0] == '\n')
-					--buffer_line;
-				}
-				else if (xpos == win_width-2)
-				{
-					--buffer_line;
-
-					if (buffer[buffer_line].size() <= xpos)
+					// in der ersten spalte (xpos ==0)
+					if (xpos == 0) 
 					{
-						for (int i = 0; i < buffer[buffer_line].size(); i++)
-						{
-							if (buffer[buffer_line].c_str()[i] == '\n')
-							{
-								xpos = i;
-								break;
-							}
-							--xpos;
-						}
+						std::string st;
+						int le;
+
+						st= buffer[buffer_line-1];
+						le= st.size()-1;
+						st.erase(le,1);
+						st= st + buffer[buffer_line];
+						buffer[buffer_line-1] =st;
+
+						buffer.erase(buffer.begin()+ buffer_line);
+
+						buffer_line--;
+						BUFFER_LINES--;
+
+						xpos = le;
+						ypos --;
 					}
-					if (xpos < 0) xpos = 0;
-				}
+					else
+					{
+						// ein zeichen irgendwo in der zeile
+						--xpos;
+						CHECK_XPOS
 
-				if (ypos < 1) ypos = 1;
-				if (ypos == 1 && buffer_line == 1) --buffer_line;
+						if (xpos == win_width-2)
+						{
+							--buffer_line;
 
-				if (buffer[buffer_line].size() > 0)
-					buffer[buffer_line].erase(xpos, 1);
+							if (buffer[buffer_line].size() <= xpos)
+							{
+								for (int i = 0; i < buffer[buffer_line].size(); i++)
+								{
+									if (buffer[buffer_line].c_str()[i] == '\n')
+									{
+										xpos = i;
+										break;
+									}
+									--xpos;
+								}
+							}
+							if (xpos < 0) xpos = 0;
+						}
 
-				if (xpos <= 0 && ypos <= 1)
-				{
-					buffer[buffer_line].erase(xpos, 1);
-					if (buffer[buffer_line].c_str()[0] != '\n')
-					buffer[buffer_line].append("\n");
-					break;
+						if (ypos < 1) ypos = 1;
+						if (ypos == 1 && buffer_line == 1) --buffer_line;
+
+						if (buffer[buffer_line].size() > 0)
+							buffer[buffer_line].erase(xpos, 1);
+					}
 				}
 			}
 			break;
