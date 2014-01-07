@@ -313,16 +313,22 @@ int main(int argc, char **argv)
 			case '\n':
 			{
 				++ypos;
-				xpos = 0;
 
 				if (xpos > 0)
 				{
-					buffer[buffer_line].insert(xpos,"\n");
+					it = buffer.begin();
+					it = buffer.insert(it + buffer_line + 1,
+						buffer[buffer_line].substr(xpos));
+
+					buffer[buffer_line].replace(xpos, std::string::npos,"\n");
 				}
-				else {
+				else 
+				{
 					it = buffer.begin();
 					it = buffer.insert(it + buffer_line,"\n");
 				}
+
+				xpos = 0;
 
 				++buffer_line;
 				++BUFFER_LINES;
