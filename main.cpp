@@ -339,10 +339,21 @@ int main(int argc, char **argv)
 			{
 				++xpos;
 
-				CHECK_YPOS
-				CHECK_XPOS;
+				//CHECK_YPOS
+				//CHECK_XPOS
 
-				char foo[4];
+				if (xpos >= win_width)
+				{
+					int i = 0;
+					for (std::vector<std::string>::iterator it =
+						buffer.begin(); it !=
+						buffer.end();  ++it)
+							tmp[i++] = *it;
+
+					for (i = 0; i < buffer.size(); i++)
+						buffer[i].erase(0,1);
+				}
+				char foo[5];
 				sprintf(foo,"%lc",ch);
 				buffer[buffer_line].insert(xpos-1, foo);
 			}
