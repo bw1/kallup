@@ -31,6 +31,8 @@
 // ersatz für all.h
 #include <iostream>
 #include <vector>
+#include <string>
+#include <sstream>
 #include <cursesw.h>
 
 
@@ -46,13 +48,16 @@
 #define CHECK_YPOS 			\
 	if (ypos <= 1) {		\
 	ypos = 1; } else		\
-	if (ypos-1 >= win_height-2) {	\
-	ypos = win_height-2;        }
+	if (ypos-1 >= win_height) {	\
+	ypos = win_height;        }
 
 int main(int argc, char **argv)
 {
 	int ch, xpos = 0, ypos = 1, buffer_line = 0, index;
 	int BUFFER_LINES = 0;
+
+	// gib den versatz des bildausschnittes an 
+	int yversatz=0;
 
 	WINDOW *bg_win;
 	WINDOW *my_win;
@@ -81,8 +86,6 @@ int main(int argc, char **argv)
 	wmove (my_win, 1, 1);
 	keypad(my_win, TRUE);
 
-	BUFFER_LINES = 6;
-
 	buffer[0] = "dfjldfjklfoiucsvio lxcv lk xcvkl xjcvklxc\n";
 	buffer[1] = " ij  jklj jklckl lkjyxc\n";
 	buffer[2] = "\n";
@@ -91,8 +94,15 @@ int main(int argc, char **argv)
 	buffer[4] = "4: kklöaksdklöaksdkadlsöklasödasdlökasdlkasd\n";
 	buffer[5] = "5: kklöaksdklöaksdkadlsöklasödasdlökasdlkasd\n";
 
+	for (int a=6; a<31 ; a++) {
+		std::stringstream ss;
+		ss << a;
+		buffer[a] = ss.str() + ": adfasdfasdf\n";
+	}
+	BUFFER_LINES = 31;
+
 	for (int i = 0; i < BUFFER_LINES; i++)
-	mvwprintw(my_win,ypos+i-1,xpos,"%s",buffer[i].c_str());
+		mvwprintw(my_win,ypos+i-1,xpos,"%s",buffer[i].c_str());
 	wmove(my_win,ypos-1,xpos);
 
 	index = 1;
@@ -170,6 +180,8 @@ int main(int argc, char **argv)
 				int tmp_xpos = xpos;
 
 				--ypos;
+				if (ypos == 0 && buffer_line > 0) yversatz--;
+
 				CHECK_YPOS
 
 				--buffer_line;
@@ -205,20 +217,20 @@ int main(int argc, char **argv)
 				int tmp_xpos = xpos;
 
 				++ypos;
+				if (ypos >win_height && buffer_line < BUFFER_LINES-1) yversatz++;
+
+
 				CHECK_YPOS
-				
-				if (++buffer_line >= BUFFER_LINES)
+
+				buffer_line	++;
+				if (buffer_line >= BUFFER_LINES) 
 				{
-					if (ypos >= BUFFER_LINES)
-					{
-						--buffer_line;
-						--ypos;
-						break;
-					}
+					buffer_line= BUFFER_LINES-1;
 				}
 
+
 				if (buffer[buffer_line].c_str()[0] == '\n')
-				xpos = 0;
+					xpos = 0;
 				else {
 					for (int i = 0; i < buffer[buffer_line].size(); i++)
 					{
@@ -350,12 +362,12 @@ int main(int argc, char **argv)
 		}
 
 		wclear(my_win);
-		for (int i = 0; i < BUFFER_LINES; i++)
-		mvwprintw(my_win,i,0,"%s",buffer[i].c_str());
+		for (int i = yversatz; i < BUFFER_LINES && i < win_height+yversatz; i++)
+			mvwprintw(my_win,i-yversatz,0,"%s",buffer[i].c_str());
 
 
-		mvwprintw(my_win,20,20,"%d, %d, %d, :: %d  =%d="
-				,xpos, ypos, buffer_line, win_width,ch);
+		mvwprintw(my_win,22,20,"%d, %d, %d, %d :: %d  =%d="
+				,xpos, ypos, buffer_line, yversatz, win_width,ch);
 
 		wmove(my_win,ypos-1,xpos);
 		wrefresh(my_win);
